@@ -17,4 +17,4 @@
 
 ## Ссылка на проект
 
-*
+ https://andrewsenichkin.github.io/express-mesto-gha/
