@@ -13,7 +13,7 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 // логин пользователя:
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then(({ _id: userId }) => {
       // аутентификация успешна!
       if (userId) {
@@ -22,11 +22,7 @@ module.exports.login = (req, res, next) => {
           NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
           { expiresIn: '7d' },
         );
-        res.cookie('jwt', token, {
-          maxAge: 604800000,
-          httpOnly: true,
-        });
-        return res.send({ _id: token });
+        return res.send({ token });
       }
       throw new Unauthorized('Неправильные почта или пароль');
     })
@@ -36,7 +32,7 @@ module.exports.login = (req, res, next) => {
 // Пользователи:
 module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.send(users))
+    .then((users) => res.send({ users }))
     .catch(next);
 };
 
@@ -44,7 +40,6 @@ module.exports.getUsers = (req, res, next) => {
 module.exports.getUserId = (req, res, next) => {
   User
     .findById(req.params.userId)
-    .orFail()
     .then((user) => {
       if (user) {
         return res.send({ user });
@@ -65,19 +60,19 @@ module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  if (password.length < 8) throw new IncorrectDate('Длина пароля меньше 8 символов');
   // хешируем пароль
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
     .then((user) => {
+      const { _id } = user;
       res.status(201).send({
-        _id: user._id,
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        email: user.email,
+        _id,
+        name,
+        about,
+        avatar,
+        email,
       });
     })
     .catch((err) => {
@@ -94,11 +89,16 @@ module.exports.createUser = (req, res, next) => {
 // Редактирование данных пользователя:
 module.exports.editProfileUserInfo = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, {
-    name: req.body.name, about: req.body.about, avatar: req.body.avatar,
-  }, { new: true })
-    .then((user) => (res.send({ data: user })))
+    name: req.body.name, about: req.body.about,
+  }, { new: true, runValidators: true })
+    .then((user) => {
+      if (user) {
+        return res.send({ user });
+      }
+      throw new NotFoundError('id не найден');
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') next(new IncorrectDate(err));
+      if (err.name === 'ValidationError' || err.name === 'CastError') next(new IncorrectDate(err));
       else next(new ServerError());
     });
 };
@@ -107,10 +107,15 @@ module.exports.editProfileUserInfo = (req, res, next) => {
 module.exports.updateProfileUserAvatar = (req, res, next) => {
   User.findOneAndUpdate(req.user._id, {
     avatar: req.body.avatar,
-  }, { new: true })
-    .then((user) => (res.send({ data: user })))
+  }, { new: true, runValidators: true })
+    .then((user) => {
+      if (user) {
+        return res.send({ user });
+      }
+      throw new NotFoundError('id не найден');
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') next(new IncorrectDate(err));
+      if (err.name === 'ValidationError' || err.name === 'CastError') next(new IncorrectDate(err));
       else next(new ServerError());
     });
 };
@@ -121,8 +126,9 @@ module.exports.getUserInfo = (req, res, next) => {
   User
     .findById(userId)
     .then((user) => {
-      if (user) return res.send({ user });
-
+      if (user) {
+        return res.send({ user });
+      }
       throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {

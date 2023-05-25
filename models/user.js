@@ -6,35 +6,28 @@ const Unauthorized = require('../errors/Unauthorized');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
+    minlength: 2,
+    maxlength: 30,
     default: 'Жак-Ив Кусто',
-    required: [true, 'Поле "name" должно быть заполнено'],
-    minlength: [2, 'Минимальная длина поля "name" - 2'],
-    maxlength: [30, 'Максимальная длина поля "name" - 30'],
-    validate: {
-      validator: (value) => validator.isAlpha(value),
-      message: 'Некорректное имя',
-    },
   },
   about: {
     type: String,
+    minlength: 2,
+    maxlength: 30,
     default: 'Исследователь',
-    required: [true, 'Поле "about" должно быть заполнено'],
-    minlength: [2, 'Минимальная длина поля "about" - 2'],
-    maxlength: [30, 'Максимальная длина поля "about" - 30'],
   },
   avatar: {
     type: String,
-    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-    required: true,
     validate: {
       validator: (url) => validator.isURL(url),
       message: 'Некорректный адрес URL',
     },
+    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
   email: {
-    type: String,
-    required: [true, 'Поле "email" должно быть заполнено'],
     unique: true,
+    type: String,
+    required: true,
     validate: {
       validator: (email) => /.+@.+\..+/.test(email),
       message: 'Неправильный формат почты',
@@ -57,12 +50,13 @@ const userSchema = new mongoose.Schema({
         .findOne({ email })
         .select('+password')
         .then((user) => {
-          if (!user) throw new Unauthorized('Неправильные почта или пароль');
+          if (!user) return Promise.reject(new Unauthorized('Неправильные почта или пароль'));
           // нашёлся — сравниваем хеши
-          return Promise.all([
-            bcrypt.compare(password, user.password),
-            user,
-          ]);
+          return bcrypt.compare(password, user.password)
+            .then((matched) => {
+              if (!matched) return Promise.reject(new Unauthorized('Неверные учетные данные'));
+              return user;
+            });
         });
     },
   },
