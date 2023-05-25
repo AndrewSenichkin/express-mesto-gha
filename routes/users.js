@@ -6,6 +6,7 @@ const {
   getUserId,
   editProfileUserInfo,
   updateProfileUserAvatar,
+  getUserInfo,
 } = require('../controllers/users');
 
 // Пользователи:
@@ -35,5 +36,7 @@ router.patch('/me/avatar', celebrate({
     avatar: Joi.string().required().uri(),
   }),
 }), updateProfileUserAvatar);
+
+router.get('/me', getUserInfo);
 
 module.exports = router;

@@ -65,6 +65,7 @@ module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
+  if (password.length < 8) throw new IncorrectDate('Длина пароля меньше 8 символов');
   // хешируем пароль
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
@@ -111,5 +112,24 @@ module.exports.updateProfileUserAvatar = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') next(new IncorrectDate(err));
       else next(new ServerError());
+    });
+};
+
+// Получение информации о пользователе:
+module.exports.getUserInfo = (req, res, next) => {
+  const { userId } = req.user;
+  User
+    .findById(userId)
+    .then((user) => {
+      if (user) return res.send({ user });
+
+      throw new NotFoundError('Пользователь с таким id не найден');
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new IncorrectDate('Передан некорректный id'));
+      } else {
+        next(err);
+      }
     });
 };
