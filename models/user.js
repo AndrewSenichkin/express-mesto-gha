@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Поле "password" должно быть заполнено'],
+    required: true,
     validate: {
       validator: ({ length }) => length >= 8,
       message: 'Минимальная длина поля должна быть 8 символов',
