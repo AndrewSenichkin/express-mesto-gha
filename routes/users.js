@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 
+const { regex } = require('../utils/constants');
 const {
   getUsers,
   getUserId,
@@ -26,14 +27,13 @@ router.patch('/me', celebrate({
       .max(30),
     about: Joi.string().required().alphanum().min(2)
       .max(30),
-    avatar: Joi.string().required().uri(),
   }),
 }), editProfileUserInfo);
 
 // Редактирование аватара пользователя:
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().uri(),
+    avatar: Joi.string().required().pattern(regex),
   }),
 }), updateProfileUserAvatar);
 

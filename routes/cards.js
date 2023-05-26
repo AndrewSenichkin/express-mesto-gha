@@ -2,6 +2,7 @@ const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const auth = require('../middlewares/auth');
 
+const { regex } = require('../utils/constants');
 const {
   getInitialCards,
   addNewCard,
@@ -18,7 +19,7 @@ router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().alphanum().min(2)
       .max(30),
-    link: Joi.string().required().uri(),
+    link: Joi.string().required().pattern(regex),
   }),
 }), auth, addNewCard);
 
