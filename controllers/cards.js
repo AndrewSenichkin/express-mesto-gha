@@ -27,23 +27,16 @@ module.exports.addNewCard = (req, res, next) => {
 
 // Удаление карточки:
 module.exports.removeCard = (req, res, next) => {
-  const { id: cardId } = req.params;
-  const { userId } = req.user;
-  Card.findById({ _id: cardId })
+  const { cardId } = req.params;
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Данные по указанному id не найдены');
       }
-      const { owner: cardOwnerId } = card;
-      if (cardOwnerId.valueOf() !== userId) {
-        throw new Forbidden('нет доступа');
+      if (!card.owner.equals(req.user._id)) {
+        return next(new Forbidden('нет доступа удалить карту'));
       }
-      return Card.findByIdAndDelete(cardId);
-    })
-    .then((cardDeleted) => {
-      if (!cardDeleted) {
-        throw new NotFoundError('Карточка уже удалена');
-      }
+      return card.deleteOne().then(() => res.send({ message: 'Карта была удалена' }));
     })
     .catch(next);
 };
