@@ -1,18 +1,20 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
+const regex = require('../utils/constants');
 
 const cardSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Поле "name" должно быть заполнено'],
-    minlength: [2, 'Минимальная длина поля "name" - 2'],
-    maxlength: [30, 'Максимальная длина поля "name" - 30'],
+    required: true,
+    validate: {
+      validator: ({ length }) => length >= 2 && length <= 30,
+      message: 'Название карточки должно быть от 2 до 30 символов',
+    },
   },
   link: {
     type: String,
     required: true,
     validate: {
-      validator: (url) => validator.isURL(url),
+      validator: (url) => regex.test(url),
       message: 'Некорректный адрес URL',
     },
   },

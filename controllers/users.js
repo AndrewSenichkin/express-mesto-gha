@@ -105,12 +105,13 @@ module.exports.editProfileUserInfo = (req, res, next) => {
 // Редактирование аватара пользователя:
 module.exports.updateProfileUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  User.findOneAndUpdate(req.user._id, {
+  const { userId } = req.user;
+  User.findOneAndUpdate(userId, {
     avatar,
   }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
-        return res.status(200).send(user);
+        return res.status(200).send({ user });
       }
       throw new NotFoundError('id не найден');
     })

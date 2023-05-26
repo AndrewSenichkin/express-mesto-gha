@@ -1,25 +1,29 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const Unauthorized = require('../errors/Unauthorized');
+const regex = require('../utils/constants');
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    minlength: 2,
-    maxlength: 30,
     default: 'Жак-Ив Кусто',
+    validate: {
+      validator: ({ length }) => length >= 2 && length <= 30,
+      message: 'Имя должно быть от 2 до 30 символов',
+    },
   },
   about: {
     type: String,
-    minlength: 2,
-    maxlength: 30,
     default: 'Исследователь',
+    validate: {
+      validator: ({ length }) => length >= 2 && length <= 30,
+      message: 'Имя должно быть от 2 до 30 символов',
+    },
   },
   avatar: {
     type: String,
     validate: {
-      validator: (url) => validator.isURL(url),
+      validator: (url) => regex.test(url),
       message: 'Некорректный адрес URL',
     },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
@@ -40,6 +44,7 @@ const userSchema = new mongoose.Schema({
       validator: ({ length }) => length >= 8,
       message: 'Минимальная длина поля должна быть 8 символов',
     },
+    select: false,
   },
 }, {
   versionKey: false,
