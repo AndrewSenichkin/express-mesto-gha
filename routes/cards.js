@@ -17,23 +17,23 @@ router.get('/', getInitialCards);
 // Создание новой карточки:
 router.post('/', celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required().alphanum().min(2)
+    name: Joi.string().required().min(2)
       .max(30),
     link: Joi.string().required().pattern(regex),
   }),
-}), auth, addNewCard);
+}), addNewCard);
 
 // Удаление карточки:
 router.delete('/:cardId', celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24).required(),
+    cardId: Joi.string().hex().length(24).required(),
   }),
-}), auth, removeCard);
+}), removeCard);
 
 // Лайк на карточки:
 router.put('/:cardId/likes', celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24),
+    cardId: Joi.string().hex().length(24),
   }),
 }), addLike);
 

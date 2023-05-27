@@ -97,7 +97,7 @@ module.exports.editProfileUserInfo = (req, res, next) => {
       throw new NotFoundError('id не найден');
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') next(new IncorrectDate(err));
+      if (err.name === 'ValidationError' || err.name === 'CastError') next(new IncorrectDate('Переданы некорректные данные'));
       else next(err);
     });
 };
@@ -116,7 +116,7 @@ module.exports.updateProfileUserAvatar = (req, res, next) => {
       throw new NotFoundError('id не найден');
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') next(new IncorrectDate(err));
+      if (err.name === 'ValidationError' || err.name === 'CastError') next(new IncorrectDate('Переданы некорректные данные'));
       else next(err);
     });
 };
@@ -127,15 +127,13 @@ module.exports.getUserInfo = (req, res, next) => {
     .findById(req.user._id)
     .then((user) => {
       if (user) {
-        return res.status(200).send(user);
+        return res.status(200).send({ user });
       }
       throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new IncorrectDate('Передан некорректный id'));
-      } else if (err.message === 'NotFound') {
-        next(new NotFoundError('Пользователь не найден'));
       } else {
         next(err);
       }

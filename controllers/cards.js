@@ -13,7 +13,7 @@ module.exports.getInitialCards = (req, res, next) => {
 // Создание новой карточки:
 module.exports.addNewCard = (req, res, next) => {
   const { name, link } = req.body;
-  const { userId } = req.user._id;
+  const { userId } = req.user;
   Card.create({ name, link, owner: userId })
     .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
@@ -27,16 +27,24 @@ module.exports.addNewCard = (req, res, next) => {
 
 // Удаление карточки:
 module.exports.removeCard = (req, res, next) => {
-  const { cardId } = req.params;
-  Card.findById(cardId)
+  const { id: cardId } = req.params;
+  const { userId } = req.user;
+  Card.findById({ _id: cardId })
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Данные по указанному id не найдены');
       }
-      if (!card.owner.equals(req.user._id)) {
-        return next(new Forbidden('нет доступа удалить карту'));
+      const { owner: cardOwnerId } = card;
+      if (cardOwnerId.valueOf() !== userId) {
+        throw new Forbidden('нет доступа');
       }
-      return card.deleteOne().then(() => res.send({ message: 'Карта была удалена' }));
+      return Card.findByIdAndDelete(cardId);
+    })
+    .then((cardDeleted) => {
+      if (!cardDeleted) {
+        throw new NotFoundError('Карточка уже была удалена');
+      }
+      res.send({ data: cardDeleted });
     })
     .catch(next);
 };
