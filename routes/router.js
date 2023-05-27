@@ -6,4 +6,5 @@ const cardRoutes = require('./cards');
 router
   .use('/users', auth, userRoutes)
   .use('/cards', auth, cardRoutes);
+
 module.exports = router;
