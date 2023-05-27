@@ -38,7 +38,7 @@ module.exports.removeCard = (req, res, next) => {
       if (cardOwnerId.valueOf() !== userId) {
         throw new Forbidden('нет доступа');
       }
-      return Card.findByIdAndDelete(cardId);
+      return Card.status(200).findByIdAndDelete(cardId);
     })
     .then((cardDeleted) => {
       if (!cardDeleted) {
@@ -59,7 +59,7 @@ module.exports.addLike = (req, res, next) => {
     { new: true },
   ).then((card) => {
     if (card) {
-      res.send({ data: card });
+      res.status(200).send({ data: card });
     }
     throw new NotFoundError('Карточка с id не найдена');
   })
@@ -82,7 +82,7 @@ module.exports.removeLike = (req, res, next) => {
     { new: true },
   ).then((card) => {
     if (card) {
-      res.send({ data: card });
+      res.status(200).send({ data: card });
     }
     throw new NotFoundError('Карточка с id не найдена');
   })
