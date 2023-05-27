@@ -5,7 +5,7 @@ const Forbidden = require('../errors/Forbidden');
 // Все карточки:
 module.exports.getInitialCards = (req, res, next) => {
   Card.find({})
-    .populate('owner')
+    .populate(['owner', 'likes'])
     .then((card) => res.send({ data: card }))
     .catch(next);
 };

@@ -37,7 +37,7 @@ module.exports.getUserId = (req, res, next) => {
     .findById(userId)
     .then((user) => {
       if (user) {
-        return res.send({ data: user });
+        return res.send({ user });
       }
       throw new NotFoundError('id не найден');
     })
@@ -87,7 +87,8 @@ module.exports.createUser = (req, res, next) => {
 // Редактирование данных пользователя:
 module.exports.editProfileUserInfo = (req, res, next) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, {
+  const { userId } = req.user;
+  User.findByIdAndUpdate(userId, {
     name, about,
   }, { new: true, runValidators: true })
     .then((user) => {
@@ -123,8 +124,9 @@ module.exports.updateProfileUserAvatar = (req, res, next) => {
 
 // Получение информации о пользователе:
 module.exports.getUserInfo = (req, res, next) => {
+  const { userId } = req.user;
   User
-    .findById(req.user._id)
+    .findById(userId)
     .then((user) => {
       if (user) {
         return res.status(200).send({ user });
