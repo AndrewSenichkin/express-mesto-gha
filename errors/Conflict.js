@@ -1,6 +1,6 @@
 module.exports = class IncorrectDate extends Error {
   constructor(message) {
     super(message);
-    this.statusCode = 409;
+    this.status = 409;
   }
 };
