@@ -17,6 +17,5 @@ module.exports = (req, res, next) => {
     return next(new Unauthorized('Неправильные почта или пароль'));
   }
   req.user = payload;
-  next();
-  return req.user;
+  return next();
 };
