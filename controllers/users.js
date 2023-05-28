@@ -115,8 +115,11 @@ module.exports.updateProfileUserAvatar = (req, res, next) => {
       throw new NotFoundError('id не найден');
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') next(new IncorrectDate('Переданы некорректные данные'));
-      else next(err);
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new IncorrectDate('Переданы некорректные данные'));
+      } else {
+        next(err);
+      }
     });
 };
 
