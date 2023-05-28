@@ -110,7 +110,7 @@ module.exports.updateProfileUserAvatar = (req, res, next) => {
   }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
-        return res.send({ user });
+        return res.send(user);
       }
       throw new NotFoundError('id не найден');
     })
