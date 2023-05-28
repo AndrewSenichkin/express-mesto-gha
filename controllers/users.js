@@ -5,6 +5,7 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const IncorrectDate = require('../errors/IncorrectDate');
 const Conflict = require('../errors/Conflict');
+const Unauthorized = require('../errors/Unauthorized');
 require('dotenv').config();
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -14,12 +15,15 @@ module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then(({ _id: userId }) => {
-      const token = jwt.sign(
-        { userId },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
-        { expiresIn: '3d' },
-      );
-      return res.send({ _id: token });
+      if (userId) {
+        const token = jwt.sign(
+          { userId },
+          NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+          { expiresIn: '3d' },
+        );
+        return res.send({ _id: token });
+      }
+      throw new Unauthorized('Неправильные почта или пароль');
     })
     .catch(next);
 };
@@ -44,9 +48,10 @@ module.exports.getUserId = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return next(new IncorrectDate('Некорректный id'));
+        next(new IncorrectDate('Некорректный id'));
+      } else {
+        next(err);
       }
-      return next(err);
     });
 };
 
@@ -86,7 +91,7 @@ module.exports.editProfileUserInfo = (req, res, next) => {
   }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
-        return res.status(200).send(user);
+        return res.send({ user });
       }
       throw new NotFoundError('id не найден');
     })
@@ -105,7 +110,7 @@ module.exports.updateProfileUserAvatar = (req, res, next) => {
   }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
-        return res.status(200).send({ user });
+        return res.send({ user });
       }
       throw new NotFoundError('id не найден');
     })
@@ -122,7 +127,7 @@ module.exports.getUserInfo = (req, res, next) => {
     .findById(userId)
     .then((user) => {
       if (user) {
-        return res.status(200).send({ user });
+        return res.send({ user });
       }
       throw new NotFoundError('Пользователь с таким id не найден');
     })

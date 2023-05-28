@@ -33,7 +33,7 @@ const app = express();
 // подключаем rate-limiter
 app.use(limiter);
 app.use(helmet());
-app.disable('x-powered-by');
+// app.disable('x-powered-by');
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
