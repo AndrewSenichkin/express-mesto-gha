@@ -23,9 +23,9 @@ router.post('/', celebrate({
 }), addNewCard);
 
 // Удаление карточки:
-router.delete('/:cardId', celebrate({
+router.delete('/:id', celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24).required(),
+    id: Joi.string().hex().length(24).required(),
   }),
 }), removeCard);
 
