@@ -8,17 +8,18 @@ const Conflict = require('../errors/Conflict');
 require('dotenv').config();
 
 const { NODE_ENV, JWT_SECRET } = process.env;
+
 // логин пользователя:
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
-    .then((user) => {
+    .then(({ _id: userId }) => {
       const token = jwt.sign(
-        { _id: user._id },
+        { userId },
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '3d' },
       );
-      return res.send({ token });
+      return res.send({ _id: token });
     })
     .catch(next);
 };
@@ -26,7 +27,7 @@ module.exports.login = (req, res, next) => {
 // Пользователи:
 module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.send(users))
+    .then((users) => res.send({ users }))
     .catch(next);
 };
 
@@ -56,32 +57,24 @@ module.exports.createUser = (req, res, next) => {
   } = req.body;
   // хешируем пароль
   bcrypt.hash(password, 10)
-    .then((hash) => {
-      User.create({
-        name, about, avatar, email, password: hash,
-      })
-        .then(() => res.status(201)
-          .send(
-            {
-              data: {
-                name,
-                about,
-                avatar,
-                email,
-              },
-            },
-          ))
-        .catch((err) => {
-          if (err.code === 11000) {
-            return next(new Conflict('Такой email уже зарегистрирован'));
-          }
-          if (err.name === 'ValidationError') {
-            return next(new IncorrectDate('Переданы некорректные данные'));
-          }
-          return next(err);
-        });
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then((user) => {
+      const { _id } = user;
+      return res.status(201).send({
+        name, about, avatar, email, _id,
+      });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new Conflict('Такой email уже зарегистрирован'));
+      }
+      if (err.name === 'ValidationError') {
+        next(new IncorrectDate('Переданы некорректные данные'));
+      }
+      next(err);
+    });
 };
 
 // Редактирование данных пользователя:

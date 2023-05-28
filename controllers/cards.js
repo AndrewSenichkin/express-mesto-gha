@@ -38,7 +38,7 @@ module.exports.removeCard = (req, res, next) => {
       if (cardOwnerId.valueOf() !== userId) {
         throw new Forbidden('нет доступа');
       }
-      return Card.status(200).findByIdAndDelete(cardId);
+      return Card.findByIdAndDelete(cardId);
     })
     .then((cardDeleted) => {
       if (!cardDeleted) {
