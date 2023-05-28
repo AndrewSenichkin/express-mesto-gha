@@ -33,9 +33,9 @@ module.exports.getUsers = (req, res, next) => {
 
 // Конкретный пользователь по его ID:
 module.exports.getUserId = (req, res, next) => {
-  const { userId } = req.params;
+  const { id } = req.params;
   User
-    .findById(userId)
+    .findById(id)
     .then((user) => {
       if (user) {
         return res.send({ user });
