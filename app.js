@@ -42,8 +42,7 @@ app.use('/', signup);
 app.use('/', signin);
 app.use(routes);
 
-app.use(auth);
-app.use((req, res, next) => next(new NotFoundError('Страницы по запрошенному URL не существует')));
+//app.use((req, res, next) => next(new NotFoundError('Страницы по запрошенному URL не существует')));
 app.use(errors());
 
 app.use((err, req, res, next) => {

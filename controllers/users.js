@@ -6,7 +6,6 @@ const NotFoundError = require('../errors/NotFoundError');
 const IncorrectDate = require('../errors/IncorrectDate');
 const Conflict = require('../errors/Conflict');
 const Unauthorized = require('../errors/Unauthorized');
-require('dotenv').config();
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -74,11 +73,11 @@ module.exports.createUser = (req, res, next) => {
     .catch((err) => {
       if (err.code === 11000) {
         next(new Conflict('Такой email уже зарегистрирован'));
-      }
-      if (err.name === 'ValidationError') {
+      } else if (err.name === 'ValidationError') {
         next(new IncorrectDate('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 

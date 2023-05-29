@@ -59,7 +59,7 @@ module.exports.addLike = (req, res, next) => {
     { new: true },
   ).then((card) => {
     if (card) {
-      res.status(200).send({ data: card });
+      return res.status(200).send({ data: card });
     }
     throw new NotFoundError('Карточка с id не найдена');
   })
@@ -82,7 +82,7 @@ module.exports.removeLike = (req, res, next) => {
     { new: true },
   ).then((card) => {
     if (card) {
-      res.status(200).send({ data: card });
+      return res.status(200).send({ data: card });
     }
     throw new NotFoundError('Карточка с id не найдена');
   })
