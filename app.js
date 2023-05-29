@@ -7,10 +7,9 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const routes = require('./routes/router');
 require('dotenv').config();
-const NotFoundError = require('./errors/NotFoundError');
+
 const signup = require('./routes/signup');
 const signin = require('./routes/signin');
-const auth = require('./middlewares/auth');
 
 const URL = 'mongodb://127.0.0.1:27017/mestodb';
 const { PORT = 3000 } = process.env;
@@ -42,7 +41,6 @@ app.use('/', signup);
 app.use('/', signin);
 app.use(routes);
 
-//app.use((req, res, next) => next(new NotFoundError('Страницы по запрошенному URL не существует')));
 app.use(errors());
 
 app.use((err, req, res, next) => {
